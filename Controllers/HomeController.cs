@@ -1,32 +1,31 @@
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using PizzaTest.Models;
+using PizzaTest.Services.Pizza;
 
 namespace PizzaTest.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly IPizzaInterface _pizzaInterface;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IPizzaInterface pizzaInterface)
         {
-            _logger = logger;
+            _pizzaInterface = pizzaInterface;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string? pesquisar)
         {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            if (pesquisar == null)
+            {
+                var pizzas = await _pizzaInterface.GetPizzas();
+                return View(pizzas);
+            }
+            else
+            {
+                var pizzas = await _pizzaInterface.GetPizzasFiltro(pesquisar);
+                return View(pizzas);
+            }
         }
     }
 }
